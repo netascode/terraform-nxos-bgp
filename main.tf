@@ -12,7 +12,7 @@ resource "nxos_bgp_instance" "bgpInst" {
 }
 
 resource "nxos_bgp_vrf" "bgpDom" {
-  for_each  = var.vrf
+  for_each  = var.vrfs
   name      = each.key
   router_id = each.value.router_id
   depends_on = [
@@ -21,7 +21,7 @@ resource "nxos_bgp_vrf" "bgpDom" {
 }
 
 resource "nxos_bgp_route_control" "bgpRtCtrl" {
-  for_each             = var.vrf
+  for_each             = var.vrfs
   vrf                  = each.key
   log_neighbor_changes = each.value.log_neighbor_changes == true ? "enabled" : "disabled"
   depends_on = [
@@ -30,7 +30,7 @@ resource "nxos_bgp_route_control" "bgpRtCtrl" {
 }
 
 resource "nxos_bgp_graceful_restart" "bgpGr" {
-  for_each         = var.vrf
+  for_each         = var.vrfs
   vrf              = each.key
   restart_interval = each.value.graseful_restart_restart_time != null ? each.value.graseful_restart_restart_time : 120
   stale_interval   = each.value.graseful_restart_stalepath_time != null ? each.value.graseful_restart_stalepath_time : 300
@@ -79,8 +79,8 @@ locals {
 
   template_peers_af_map = merge([
     for template_name, template in var.template_peers : {
-      for af_name, af in template.address_family : "${template_name}-${af_name}" => merge(af, { "template_name" : template_name, "address_family" : local.address_family_names_map[af_name] })
-    } if template.address_family != null
+      for af_name, af in template.address_families : "${template_name}-${af_name}" => merge(af, { "template_name" : template_name, "address_family" : local.address_family_names_map[af_name] })
+    } if template.address_families != null
   ]...)
 }
 
@@ -101,7 +101,7 @@ Example:
 {
   "VRF1-50.60.70.80" = {
     "address" = "50.60.70.80"
-    "address_family" = tomap(null)
+    "address_families" = tomap(null)
     "asn" = tostring(null)
     "description" = "My description"
     "inherit_peer" = tostring(null)
@@ -111,7 +111,7 @@ Example:
   }
   "default-5.6.7.8" = {
     "address" = "5.6.7.8"
-    "address_family" = tomap({
+    "address_families" = tomap({
       "ipv4_unicast" = {
         "route_reflector_client" = false
         "send_community_extended" = true
@@ -133,7 +133,7 @@ Example:
 */
 locals {
   neighbors_map = merge([
-    for vrf_name, vrf in var.vrf : {
+    for vrf_name, vrf in var.vrfs : {
       for neighbor_ip, neighbor in vrf.neighbors : "${vrf_name}-${neighbor_ip}" => merge(neighbor, { "vrf_name" : vrf_name, "address" : neighbor_ip })
     }
   ]...)
@@ -177,8 +177,8 @@ Example:
 locals {
   neighbors_af_map = merge([
     for neighbor_key, neighbor in local.neighbors_map : {
-      for af_name, af in neighbor.address_family : "${neighbor_key}-${af_name}" => merge(af, { "vrf_name" : neighbor.vrf_name, "address" : neighbor.address, "address_family" : local.address_family_names_map[af_name] })
-    } if neighbor.address_family != null
+      for af_name, af in neighbor.address_families : "${neighbor_key}-${af_name}" => merge(af, { "vrf_name" : neighbor.vrf_name, "address" : neighbor.address, "address_family" : local.address_family_names_map[af_name] })
+    } if neighbor.address_families != null
   ]...)
 }
 

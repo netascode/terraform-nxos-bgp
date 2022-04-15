@@ -24,7 +24,7 @@ module "nxos_bgp" {
       description      = "Spine Peers template"
       peer_type        = "fabric-external"
       source_interface = "lo0"
-      address_family = {
+      address_families = {
         ipv4_unicast = {
           send_community_standard = true
           route_reflector_client  = true
@@ -37,7 +37,7 @@ module "nxos_bgp" {
       }
     }
   }
-  vrf = {
+  vrfs = {
     "default" = {
       router_id                       = "1.2.3.4"
       log_neighbor_changes            = true
@@ -49,7 +49,7 @@ module "nxos_bgp" {
           peer_type        = "fabric-external"
           asn              = "65002"
           source_interface = "lo2"
-          address_family = {
+          address_families = {
             ipv4_unicast = {
               send_community_standard = true
               send_community_extended = true

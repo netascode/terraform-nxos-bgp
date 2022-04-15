@@ -21,7 +21,7 @@ variable "template_peers" {
     description      = optional(string)
     peer_type        = optional(string)
     source_interface = optional(string)
-    address_family = optional(map(object({
+    address_families = optional(map(object({
       send_community_standard = optional(bool)
       send_community_extended = optional(bool)
       route_reflector_client  = optional(bool)
@@ -66,16 +66,16 @@ variable "template_peers" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.template_peers : value.address_family == null ? [true] : [
-        for k, v in value.address_family : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
+      for key, value in var.template_peers : value.address_families == null ? [true] : [
+        for k, v in value.address_families : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
       ]
     ]))
-    error_message = "`address_family`: Valid map keys are `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`."
+    error_message = "`address_families`: Valid map keys are `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`."
   }
 }
 
-variable "vrf" {
-  description = "BGP VRF."
+variable "vrfs" {
+  description = "BGP VRFs."
   type = map(object({
     router_id                       = optional(string)
     log_neighbor_changes            = optional(bool)
@@ -87,7 +87,7 @@ variable "vrf" {
       description      = optional(string)
       peer_type        = optional(string)
       source_interface = optional(string)
-      address_family = optional(map(object({
+      address_families = optional(map(object({
         send_community_standard = optional(bool)
         send_community_extended = optional(bool)
         route_reflector_client  = optional(bool)
@@ -98,28 +98,28 @@ variable "vrf" {
 
   validation {
     condition = alltrue([
-      for k, v in var.vrf : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", v.router_id)) || v.router_id == null
+      for k, v in var.vrfs : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", v.router_id)) || v.router_id == null
     ])
     error_message = "`router_id`: Allowed formats: 192.168.1.1."
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.vrf : try(v.graseful_restart_stalepath_time >= 1 && v.graseful_restart_stalepath_time <= 3600, v.graseful_restart_stalepath_time == null)
+      for k, v in var.vrfs : try(v.graseful_restart_stalepath_time >= 1 && v.graseful_restart_stalepath_time <= 3600, v.graseful_restart_stalepath_time == null)
     ])
     error_message = "`graseful_restart_stalepath_time`: Minimum value: 1. Maximum value: 3600."
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.vrf : try(v.graseful_restart_restart_time >= 1 && v.graseful_restart_restart_time <= 3600, v.graseful_restart_restart_time == null)
+      for k, v in var.vrfs : try(v.graseful_restart_restart_time >= 1 && v.graseful_restart_restart_time <= 3600, v.graseful_restart_restart_time == null)
     ])
     error_message = "`graseful_restart_restart_time`: Minimum value: 1. Maximum value: 3600."
   }
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrf : value.neighbors == null ? [true] : [
+      for key, value in var.vrfs : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", k)) || can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+\\/\\d+$", k))
       ]
     ]))
@@ -128,7 +128,7 @@ variable "vrf" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrf : value.neighbors == null ? [true] : [
+      for key, value in var.vrfs : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\d+\\.\\d+$", v.asn)) || can(regex("^\\d+$", v.asn)) || v.asn == null
       ]
     ]))
@@ -137,7 +137,7 @@ variable "vrf" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrf : value.neighbors == null ? [true] : [
+      for key, value in var.vrfs : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\S+$", v.inherit_peer)) || v.inherit_peer == null
       ]
     ]))
@@ -146,7 +146,7 @@ variable "vrf" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrf : value.neighbors == null ? [true] : [
+      for key, value in var.vrfs : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^.{0,254}$", v.description)) || v.description == null
       ]
     ]))
@@ -155,7 +155,7 @@ variable "vrf" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrf : value.neighbors == null ? [true] : [
+      for key, value in var.vrfs : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : try(contains(["fabric-internal", "fabric-external", "fabric-border-leaf"], v.peer_type), v.peer_type == null, false)
       ]
     ]))
@@ -164,7 +164,7 @@ variable "vrf" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrf : value.neighbors == null ? [true] : [
+      for key, value in var.vrfs : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\S*$", v.source_interface)) || v.source_interface == null
       ]
     ]))
@@ -173,12 +173,12 @@ variable "vrf" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrf : value.neighbors == null ? [true] : flatten([
-        for neighbor_key, neighbor_value in value.neighbors : neighbor_value.address_family == null ? [true] : [
-          for k, v in neighbor_value.address_family : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
+      for key, value in var.vrfs : value.neighbors == null ? [true] : flatten([
+        for neighbor_key, neighbor_value in value.neighbors : neighbor_value.address_families == null ? [true] : [
+          for k, v in neighbor_value.address_families : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
         ]
       ])
     ]))
-    error_message = "`address_family`: Valid map keys are `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`."
+    error_message = "`address_families`: Valid map keys are `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`."
   }
 }
