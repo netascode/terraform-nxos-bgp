@@ -103,7 +103,7 @@ resource "nxos_bgp" "bgpEntity" {
 resource "nxos_bgp_instance" "bgpInst" {
   admin_state             = "enabled"
   asn                     = var.asn
-  enhanced_error_handling = var.enhanced_error_handling == true ? "yes" : "no"
+  enhanced_error_handling = var.enhanced_error_handling
   depends_on = [
     nxos_bgp.bgpEntity
   ]
