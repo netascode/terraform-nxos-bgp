@@ -1,3 +1,101 @@
+locals {
+  address_family_names_map = {
+    "ipv4_unicast" : "ipv4-ucast"
+    "ipv6_unicast" : "ipv6-ucast"
+    "l2vpn_evpn" : "l2vpn-evpn"
+  }
+  template_peers_af_map = merge([
+    for template_name, template in var.template_peers : {
+      for af_name, af in template.address_families : "${template_name}-${af_name}" => merge(af, { "template_name" : template_name, "address_family" : local.address_family_names_map[af_name] })
+    } if template.address_families != null
+  ]...)
+  /* Example:
+  {
+    "SPINE-PEERS-ipv4_unicast" = {
+      "address_family" = "ipv4-ucast"
+      "route_reflector_client" = true
+      "send_community_extended" = tobool(null)
+      "send_community_standard" = true
+      "template_name" = "SPINE-PEERS"
+    }
+    "SPINE-PEERS-l2vpn_evpn" = {
+      "address_family" = "l2vpn-evpn"
+      "route_reflector_client" = true
+      "send_community_extended" = tobool(null)
+      "send_community_standard" = true
+      "template_name" = "SPINE-PEERS"
+    }
+  }
+  */
+
+  neighbors_map = merge([
+    for vrf_name, vrf in var.vrfs : {
+      for neighbor_ip, neighbor in vrf.neighbors : "${vrf_name}-${neighbor_ip}" => merge(neighbor, { "vrf_name" : vrf_name, "address" : neighbor_ip })
+    }
+  ]...)
+  /* Example:
+  {
+    "VRF1-50.60.70.80" = {
+      "address" = "50.60.70.80"
+      "address_families" = tomap(null)
+      "asn" = tostring(null)
+      "description" = "My description"
+      "inherit_peer" = tostring(null)
+      "peer_type" = tostring(null)
+      "source_interface" = tostring(null)
+      "vrf_name" = "VRF1"
+    }
+    "default-5.6.7.8" = {
+      "address" = "5.6.7.8"
+      "address_families" = tomap({
+        "ipv4_unicast" = {
+          "route_reflector_client" = false
+          "send_community_extended" = true
+          "send_community_standard" = true
+        }
+        "l2vpn_evpn" = {
+          "route_reflector_client" = false
+          "send_community_extended" = tobool(null)
+          "send_community_standard" = true
+        }
+      })
+      "asn" = "65002"
+      "description" = "My description"
+      "inherit_peer" = tostring(null)
+      "peer_type" = "fabric-external"
+      "source_interface" = "lo2"
+      "vrf_name" = "default"
+  }
+  */
+
+  neighbors_af_map = merge([
+    for neighbor_key, neighbor in local.neighbors_map : {
+      for af_name, af in neighbor.address_families : "${neighbor_key}-${af_name}" => merge(af, { "vrf_name" : neighbor.vrf_name, "address" : neighbor.address, "address_family" : local.address_family_names_map[af_name] })
+    } if neighbor.address_families != null
+  ]...)
+  /*
+  Example:
+  {
+    "default-5.6.7.8-ipv4_unicast" = {
+      "address" = "5.6.7.8"
+      "address_family" = "ipv4-ucast"
+      "route_reflector_client" = false
+      "send_community_extended" = true
+      "send_community_standard" = true
+      "vrf_name" = "default"
+    }
+    "default-5.6.7.8-l2vpn_evpn" = {
+      "address" = "5.6.7.8"
+      "address_family" = "l2vpn-evpn"
+      "route_reflector_client" = false
+      "send_community_extended" = tobool(null)
+      "send_community_standard" = true
+      "vrf_name" = "default"
+    }
+  }
+  */
+}
+
 resource "nxos_bgp" "bgpEntity" {
   admin_state = "enabled"
 }
@@ -51,39 +149,6 @@ resource "nxos_bgp_peer_template" "bgpPeerCont" {
   ]
 }
 
-/*
-Example:
-{
-  "SPINE-PEERS-ipv4_unicast" = {
-    "address_family" = "ipv4-ucast"
-    "route_reflector_client" = true
-    "send_community_extended" = tobool(null)
-    "send_community_standard" = true
-    "template_name" = "SPINE-PEERS"
-  }
-  "SPINE-PEERS-l2vpn_evpn" = {
-    "address_family" = "l2vpn-evpn"
-    "route_reflector_client" = true
-    "send_community_extended" = tobool(null)
-    "send_community_standard" = true
-    "template_name" = "SPINE-PEERS"
-  }
-}
-*/
-locals {
-  address_family_names_map = {
-    "ipv4_unicast" : "ipv4-ucast"
-    "ipv6_unicast" : "ipv6-ucast"
-    "l2vpn_evpn" : "l2vpn-evpn"
-  }
-
-  template_peers_af_map = merge([
-    for template_name, template in var.template_peers : {
-      for af_name, af in template.address_families : "${template_name}-${af_name}" => merge(af, { "template_name" : template_name, "address_family" : local.address_family_names_map[af_name] })
-    } if template.address_families != null
-  ]...)
-}
-
 resource "nxos_bgp_peer_template_address_family" "bgpPeerAf" {
   for_each                = local.template_peers_af_map
   template_name           = each.value.template_name
@@ -94,49 +159,6 @@ resource "nxos_bgp_peer_template_address_family" "bgpPeerAf" {
   depends_on = [
     nxos_bgp_peer_template.bgpPeerCont
   ]
-}
-
-/*
-Example:
-{
-  "VRF1-50.60.70.80" = {
-    "address" = "50.60.70.80"
-    "address_families" = tomap(null)
-    "asn" = tostring(null)
-    "description" = "My description"
-    "inherit_peer" = tostring(null)
-    "peer_type" = tostring(null)
-    "source_interface" = tostring(null)
-    "vrf_name" = "VRF1"
-  }
-  "default-5.6.7.8" = {
-    "address" = "5.6.7.8"
-    "address_families" = tomap({
-      "ipv4_unicast" = {
-        "route_reflector_client" = false
-        "send_community_extended" = true
-        "send_community_standard" = true
-      }
-      "l2vpn_evpn" = {
-        "route_reflector_client" = false
-        "send_community_extended" = tobool(null)
-        "send_community_standard" = true
-      }
-    })
-    "asn" = "65002"
-    "description" = "My description"
-    "inherit_peer" = tostring(null)
-    "peer_type" = "fabric-external"
-    "source_interface" = "lo2"
-    "vrf_name" = "default"
-}
-*/
-locals {
-  neighbors_map = merge([
-    for vrf_name, vrf in var.vrfs : {
-      for neighbor_ip, neighbor in vrf.neighbors : "${vrf_name}-${neighbor_ip}" => merge(neighbor, { "vrf_name" : vrf_name, "address" : neighbor_ip })
-    }
-  ]...)
 }
 
 resource "nxos_bgp_peer" "bgpPeer" {
@@ -153,35 +175,6 @@ resource "nxos_bgp_peer" "bgpPeer" {
   ]
 }
 
-/*
-Example:
-{
-  "default-5.6.7.8-ipv4_unicast" = {
-    "address" = "5.6.7.8"
-    "address_family" = "ipv4-ucast"
-    "route_reflector_client" = false
-    "send_community_extended" = true
-    "send_community_standard" = true
-    "vrf_name" = "default"
-  }
-  "default-5.6.7.8-l2vpn_evpn" = {
-    "address" = "5.6.7.8"
-    "address_family" = "l2vpn-evpn"
-    "route_reflector_client" = false
-    "send_community_extended" = tobool(null)
-    "send_community_standard" = true
-    "vrf_name" = "default"
-  }
-}
-*/
-locals {
-  neighbors_af_map = merge([
-    for neighbor_key, neighbor in local.neighbors_map : {
-      for af_name, af in neighbor.address_families : "${neighbor_key}-${af_name}" => merge(af, { "vrf_name" : neighbor.vrf_name, "address" : neighbor.address, "address_family" : local.address_family_names_map[af_name] })
-    } if neighbor.address_families != null
-  ]...)
-}
-
 resource "nxos_bgp_peer_address_family" "bgpPeerAf" {
   for_each                = local.neighbors_af_map
   vrf                     = each.value.vrf_name
@@ -194,4 +187,3 @@ resource "nxos_bgp_peer_address_family" "bgpPeerAf" {
     nxos_bgp_peer.bgpPeer
   ]
 }
-

@@ -9,7 +9,7 @@ variable "asn" {
 }
 
 variable "enhanced_error_handling" {
-  description = "BGP Enhanced error handling"
+  description = "BGP Enhanced error handling."
   type        = bool
   default     = true
 }
