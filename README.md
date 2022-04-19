@@ -18,13 +18,13 @@ module "nxos_bgp" {
 
   asn                     = "65001"
   enhanced_error_handling = false
-  template_peers = {
+  template_peer = {
     "SPINE-PEERS" = {
       asn              = "65001"
       description      = "Spine Peers template"
       peer_type        = "fabric-external"
       source_interface = "lo0"
-      address_families = {
+      address_family = {
         ipv4_unicast = {
           send_community_standard = true
           route_reflector_client  = true
@@ -37,7 +37,7 @@ module "nxos_bgp" {
       }
     }
   }
-  vrfs = {
+  vrf = {
     "default" = {
       router_id                       = "1.2.3.4"
       log_neighbor_changes            = true
@@ -49,7 +49,7 @@ module "nxos_bgp" {
           peer_type        = "fabric-external"
           asn              = "65002"
           source_interface = "lo2"
-          address_families = {
+          address_family = {
             ipv4_unicast = {
               send_community_standard = true
               send_community_extended = true
@@ -90,22 +90,22 @@ module "nxos_bgp" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_nxos"></a> [nxos](#requirement\_nxos) | >= 0.1.0 |
+| <a name="requirement_nxos"></a> [nxos](#requirement\_nxos) | >= 0.3.4 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nxos"></a> [nxos](#provider\_nxos) | 0.3.2 |
+| <a name="provider_nxos"></a> [nxos](#provider\_nxos) | 0.3.4 |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_asn"></a> [asn](#input\_asn) | BGP Autonomous system number. | `string` | n/a | yes |
+| <a name="input_asn"></a> [asn](#input\_asn) | BGP Autonomous system number. | `string` | `"65001"` | no |
 | <a name="input_enhanced_error_handling"></a> [enhanced\_error\_handling](#input\_enhanced\_error\_handling) | BGP Enhanced error handling. | `bool` | `true` | no |
-| <a name="input_template_peers"></a> [template\_peers](#input\_template\_peers) | BGP template peers. | <pre>map(object({<br>    asn              = optional(string)<br>    description      = optional(string)<br>    peer_type        = optional(string)<br>    source_interface = optional(string)<br>    address_families = optional(map(object({<br>      send_community_standard = optional(bool)<br>      send_community_extended = optional(bool)<br>      route_reflector_client  = optional(bool)<br>    })))<br>  }))</pre> | `{}` | no |
-| <a name="input_vrfs"></a> [vrfs](#input\_vrfs) | BGP VRFs. | <pre>map(object({<br>    router_id                       = optional(string)<br>    log_neighbor_changes            = optional(bool)<br>    graseful_restart_stalepath_time = optional(number)<br>    graseful_restart_restart_time   = optional(number)<br>    neighbors = optional(map(object({<br>      asn              = optional(string)<br>      inherit_peer     = optional(string)<br>      description      = optional(string)<br>      peer_type        = optional(string)<br>      source_interface = optional(string)<br>      address_families = optional(map(object({<br>        send_community_standard = optional(bool)<br>        send_community_extended = optional(bool)<br>        route_reflector_client  = optional(bool)<br>      })))<br>    })))<br>  }))</pre> | `{}` | no |
+| <a name="input_template_peer"></a> [template\_peer](#input\_template\_peer) | BGP template peers. | <pre>map(object({<br>    asn              = optional(string)<br>    description      = optional(string)<br>    peer_type        = optional(string)<br>    source_interface = optional(string)<br>    address_family = optional(map(object({<br>      send_community_standard = optional(bool)<br>      send_community_extended = optional(bool)<br>      route_reflector_client  = optional(bool)<br>    })))<br>  }))</pre> | <pre>{<br>  "SPINE-PEERS": {<br>    "asn": "65001",<br>    "description": "Spine Peers template",<br>    "peer_type": "fabric-external",<br>    "source_interface": "lo0",<br>    "temaddress_family": {<br>      "ipv4_unicast": {<br>        "route_reflector_client": true,<br>        "send_community_standard": true<br>      },<br>      "l2vpn_evpn": {<br>        "route_reflector_client": true,<br>        "send_community_extended": true,<br>        "send_community_standard": true<br>      }<br>    }<br>  }<br>}</pre> | no |
+| <a name="input_vrf"></a> [vrf](#input\_vrf) | BGP VRFs. | <pre>map(object({<br>    router_id                       = optional(string)<br>    log_neighbor_changes            = optional(bool)<br>    graseful_restart_stalepath_time = optional(number)<br>    graseful_restart_restart_time   = optional(number)<br>    neighbors = optional(map(object({<br>      asn              = optional(string)<br>      inherit_peer     = optional(string)<br>      description      = optional(string)<br>      peer_type        = optional(string)<br>      source_interface = optional(string)<br>      address_family = optional(map(object({<br>        send_community_standard = optional(bool)<br>        send_community_extended = optional(bool)<br>        route_reflector_client  = optional(bool)<br>      })))<br>    })))<br>  }))</pre> | <pre>{<br>  "VRF1": {<br>    "graseful_restart_restart_time": 1230,<br>    "graseful_restart_stalepath_time": 1230,<br>    "log_neighbor_changes": true,<br>    "neighbors": {<br>      "50.60.70.80": {<br>        "description": "My description"<br>      },<br>      "90.100.110.120": {<br>        "description": "My description 2"<br>      }<br>    },<br>    "router_id": "10.20.30.40"<br>  },<br>  "default": {<br>    "graseful_restart_restart_time": 123,<br>    "graseful_restart_stalepath_time": 123,<br>    "log_neighbor_changes": true,<br>    "neighbors": {<br>      "5.6.7.8": {<br>        "asn": "65002",<br>        "description": "My description",<br>        "peer_type": "fabric-external",<br>        "source_interface": "lo2",<br>        "temaddress_family": {<br>          "ipv4_unicast": {<br>            "route_reflector_client": false,<br>            "send_community_extended": true,<br>            "send_community_standard": true<br>          },<br>          "l2vpn_evpn": {<br>            "route_reflector_client": false,<br>            "send_community_standard": true<br>          }<br>        }<br>      },<br>      "9.10.11.12": {<br>        "description": "My description 2",<br>        "inherit_peer": "SPINE-PEERS"<br>      }<br>    },<br>    "router_id": "1.2.3.4"<br>  }<br>}</pre> | no |
 
 ## Outputs
 
