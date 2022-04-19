@@ -5,7 +5,7 @@ terraform {
   required_providers {
     nxos = {
       source  = "netascode/nxos"
-      version = ">= 0.1.0"
+      version = ">= 0.3.4"
     }
   }
 

@@ -1,10 +1,11 @@
 variable "asn" {
   description = "BGP Autonomous system number."
   type        = string
+  default     = "65001"
 
   validation {
     condition     = can(regex("^\\d+\\.\\d+$", var.asn)) || can(regex("^\\d+$", var.asn))
-    error_message = "`asn`: Allowed formats: 1-4294967295> or 1-65535.0-65535."
+    error_message = "`asn`: Allowed formats: `1-4294967295` or `1-65535.0-65535`."
   }
 }
 
@@ -14,67 +15,85 @@ variable "enhanced_error_handling" {
   default     = true
 }
 
-variable "template_peers" {
+variable "template_peer" {
   description = "BGP template peers."
   type = map(object({
     asn              = optional(string)
     description      = optional(string)
     peer_type        = optional(string)
     source_interface = optional(string)
-    address_families = optional(map(object({
+    address_family = optional(map(object({
       send_community_standard = optional(bool)
       send_community_extended = optional(bool)
       route_reflector_client  = optional(bool)
     })))
   }))
-  default = {}
-
-  validation {
-    condition = alltrue([
-      for k, v in var.template_peers : can(regex("^\\S+$", k))
-    ])
-    error_message = "`template_peers`: Whitespaces are not allowed in `template_peers` map keys."
+  default = {
+    "SPINE-PEERS" = {
+      asn              = "65001"
+      description      = "Spine Peers template"
+      peer_type        = "fabric-external"
+      source_interface = "lo0"
+      temaddress_family = {
+        ipv4_unicast = {
+          send_community_standard = true
+          route_reflector_client  = true
+        }
+        l2vpn_evpn = {
+          send_community_standard = true
+          send_community_extended = true
+          route_reflector_client  = true
+        }
+      }
+    }
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.template_peers : can(regex("^\\d+\\.\\d+$", v.asn)) || can(regex("^\\d+$", v.asn)) || v.asn == null
+      for k, v in var.template_peer : can(regex("^\\S+$", k))
     ])
-    error_message = "`asn`: Allowed formats: 1-4294967295> or 1-65535.0-65535."
+    error_message = "`template_peer`: Whitespaces are not allowed in map keys."
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.template_peers : can(regex("^.{0,254}$", v.description)) || v.description == null
+      for k, v in var.template_peer : can(regex("^\\d+\\.\\d+$", v.asn)) || can(regex("^\\d+$", v.asn)) || v.asn == null
+    ])
+    error_message = "`asn`: Allowed formats: `1-4294967295` or `1-65535.0-65535`."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.template_peer : can(regex("^.{0,254}$", v.description)) || v.description == null
     ])
     error_message = "`description`: Maximum characters: 254."
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.template_peers : try(contains(["fabric-internal", "fabric-external", "fabric-border-leaf"], v.peer_type), v.peer_type == null, false)
+      for k, v in var.template_peer : try(contains(["fabric-internal", "fabric-external", "fabric-border-leaf"], v.peer_type), v.peer_type == null, false)
     ])
-    error_message = "`peer_type`: Valid values are `fabric-internal`, `fabric-external`, `fabric-border-leaf`."
+    error_message = "`peer_type`: Allowed values are `fabric-internal`, `fabric-external` or `fabric-border-leaf`."
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.template_peers : can(regex("^\\S*$", v.source_interface)) || v.source_interface == null
+      for k, v in var.template_peer : can(regex("^\\S*$", v.source_interface)) || v.source_interface == null
     ])
     error_message = "`source_interface`: Whitespaces are not allowed. Must match first field in the output of `show intf brief`. Example: `eth1/1`."
   }
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.template_peers : value.address_families == null ? [true] : [
-        for k, v in value.address_families : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
+      for key, value in var.template_peer : value.address_family == null ? [true] : [
+        for k, v in value.address_family : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
       ]
     ]))
-    error_message = "`address_families`: Valid map keys are `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`."
+    error_message = "`address_family`: Allowed map keys are `ipv4_unicast`, `ipv6_unicast` or `l2vpn_evpn`."
   }
 }
 
-variable "vrfs" {
+variable "vrf" {
   description = "BGP VRFs."
   type = map(object({
     router_id                       = optional(string)
@@ -87,57 +106,101 @@ variable "vrfs" {
       description      = optional(string)
       peer_type        = optional(string)
       source_interface = optional(string)
-      address_families = optional(map(object({
+      address_family = optional(map(object({
         send_community_standard = optional(bool)
         send_community_extended = optional(bool)
         route_reflector_client  = optional(bool)
       })))
     })))
   }))
-  default = {}
-
-  validation {
-    condition = alltrue([
-      for k, v in var.vrfs : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", v.router_id)) || v.router_id == null
-    ])
-    error_message = "`router_id`: Allowed formats: 192.168.1.1."
+  default = {
+    "default" = {
+      router_id                       = "1.2.3.4"
+      log_neighbor_changes            = true
+      graseful_restart_stalepath_time = 123
+      graseful_restart_restart_time   = 123
+      neighbors = {
+        "5.6.7.8" = {
+          description      = "My description"
+          peer_type        = "fabric-external"
+          asn              = "65002"
+          source_interface = "lo2"
+          temaddress_family = {
+            ipv4_unicast = {
+              send_community_standard = true
+              send_community_extended = true
+              route_reflector_client  = false
+            }
+            l2vpn_evpn = {
+              send_community_standard = true
+              route_reflector_client  = false
+            }
+          }
+        }
+        "9.10.11.12" = {
+          description  = "My description 2"
+          inherit_peer = "SPINE-PEERS"
+        }
+      }
+    }
+    "VRF1" = {
+      router_id                       = "10.20.30.40"
+      log_neighbor_changes            = true
+      graseful_restart_stalepath_time = 1230
+      graseful_restart_restart_time   = 1230
+      neighbors = {
+        "50.60.70.80" = {
+          description = "My description"
+        }
+        "90.100.110.120" = {
+          description = "My description 2"
+        }
+      }
+    }
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.vrfs : try(v.graseful_restart_stalepath_time >= 1 && v.graseful_restart_stalepath_time <= 3600, v.graseful_restart_stalepath_time == null)
+      for k, v in var.vrf : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", v.router_id)) || v.router_id == null
     ])
-    error_message = "`graseful_restart_stalepath_time`: Minimum value: 1. Maximum value: 3600."
+    error_message = "`router_id`: Allowed formats: `192.168.1.1`."
   }
 
   validation {
     condition = alltrue([
-      for k, v in var.vrfs : try(v.graseful_restart_restart_time >= 1 && v.graseful_restart_restart_time <= 3600, v.graseful_restart_restart_time == null)
+      for k, v in var.vrf : try(v.graseful_restart_stalepath_time >= 1 && v.graseful_restart_stalepath_time <= 3600, v.graseful_restart_stalepath_time == null)
     ])
-    error_message = "`graseful_restart_restart_time`: Minimum value: 1. Maximum value: 3600."
+    error_message = "`graseful_restart_stalepath_time`: Minimum value: `1`. Maximum value: `3600`."
+  }
+
+  validation {
+    condition = alltrue([
+      for k, v in var.vrf : try(v.graseful_restart_restart_time >= 1 && v.graseful_restart_restart_time <= 3600, v.graseful_restart_restart_time == null)
+    ])
+    error_message = "`graseful_restart_restart_time`: Minimum value: `1`. Maximum value: `3600`."
   }
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrfs : value.neighbors == null ? [true] : [
+      for key, value in var.vrf : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", k)) || can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+\\/\\d+$", k))
       ]
     ]))
-    error_message = "`neighbors`: Map keys allowed format: 192.168.1.1 or 192.168.1.0/24."
+    error_message = "`neighbors`: Map keys allowed format: `192.168.1.1` or `192.168.1.0/24`."
   }
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrfs : value.neighbors == null ? [true] : [
+      for key, value in var.vrf : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\d+\\.\\d+$", v.asn)) || can(regex("^\\d+$", v.asn)) || v.asn == null
       ]
     ]))
-    error_message = "`asn`: Allowed formats: 1-4294967295> or 1-65535.0-65535."
+    error_message = "`asn`: Allowed formats: `1-4294967295` or `1-65535.0-65535`."
   }
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrfs : value.neighbors == null ? [true] : [
+      for key, value in var.vrf : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\S+$", v.inherit_peer)) || v.inherit_peer == null
       ]
     ]))
@@ -146,7 +209,7 @@ variable "vrfs" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrfs : value.neighbors == null ? [true] : [
+      for key, value in var.vrf : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^.{0,254}$", v.description)) || v.description == null
       ]
     ]))
@@ -155,16 +218,16 @@ variable "vrfs" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrfs : value.neighbors == null ? [true] : [
+      for key, value in var.vrf : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : try(contains(["fabric-internal", "fabric-external", "fabric-border-leaf"], v.peer_type), v.peer_type == null, false)
       ]
     ]))
-    error_message = "`peer_type`: Valid values are `fabric-internal`, `fabric-external`, `fabric-border-leaf`."
+    error_message = "`peer_type`: Allowed values are `fabric-internal`, `fabric-external` or `fabric-border-leaf`."
   }
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrfs : value.neighbors == null ? [true] : [
+      for key, value in var.vrf : value.neighbors == null ? [true] : [
         for k, v in value.neighbors : can(regex("^\\S*$", v.source_interface)) || v.source_interface == null
       ]
     ]))
@@ -173,12 +236,12 @@ variable "vrfs" {
 
   validation {
     condition = alltrue(flatten([
-      for key, value in var.vrfs : value.neighbors == null ? [true] : flatten([
-        for neighbor_key, neighbor_value in value.neighbors : neighbor_value.address_families == null ? [true] : [
-          for k, v in neighbor_value.address_families : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
+      for key, value in var.vrf : value.neighbors == null ? [true] : flatten([
+        for neighbor_key, neighbor_value in value.neighbors : neighbor_value.address_family == null ? [true] : [
+          for k, v in neighbor_value.address_family : contains(["ipv4_unicast", "ipv6_unicast", "l2vpn_evpn"], k)
         ]
       ])
     ]))
-    error_message = "`address_families`: Valid map keys are `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`."
+    error_message = "`address_family`: Allowed map keys are `ipv4_unicast`, `ipv6_unicast` or `l2vpn_evpn`."
   }
 }
