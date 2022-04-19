@@ -18,13 +18,13 @@ module "nxos_bgp" {
 
   asn                     = "65001"
   enhanced_error_handling = false
-  template_peers = {
+  template_peer = {
     "SPINE-PEERS" = {
       asn              = "65001"
       description      = "Spine Peers template"
       peer_type        = "fabric-external"
       source_interface = "lo0"
-      address_families = {
+      address_family = {
         ipv4_unicast = {
           send_community_standard = true
           route_reflector_client  = true
@@ -37,7 +37,7 @@ module "nxos_bgp" {
       }
     }
   }
-  vrfs = {
+  vrf = {
     "default" = {
       router_id                       = "1.2.3.4"
       log_neighbor_changes            = true
@@ -49,7 +49,7 @@ module "nxos_bgp" {
           peer_type        = "fabric-external"
           asn              = "65002"
           source_interface = "lo2"
-          address_families = {
+          address_family = {
             ipv4_unicast = {
               send_community_standard = true
               send_community_extended = true
@@ -90,13 +90,13 @@ module "nxos_bgp" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0.0 |
-| <a name="requirement_nxos"></a> [nxos](#requirement\_nxos) | >= 0.1.0 |
+| <a name="requirement_nxos"></a> [nxos](#requirement\_nxos) | >= 0.3.4 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nxos"></a> [nxos](#provider\_nxos) | 0.3.2 |
+| <a name="provider_nxos"></a> [nxos](#provider\_nxos) | 0.3.4 |
 
 ## Inputs
 
@@ -104,8 +104,8 @@ module "nxos_bgp" {
 |------|-------------|------|---------|:--------:|
 | <a name="input_asn"></a> [asn](#input\_asn) | BGP Autonomous system number. | `string` | n/a | yes |
 | <a name="input_enhanced_error_handling"></a> [enhanced\_error\_handling](#input\_enhanced\_error\_handling) | BGP Enhanced error handling. | `bool` | `true` | no |
-| <a name="input_template_peers"></a> [template\_peers](#input\_template\_peers) | BGP template peers. | <pre>map(object({<br>    asn              = optional(string)<br>    description      = optional(string)<br>    peer_type        = optional(string)<br>    source_interface = optional(string)<br>    address_families = optional(map(object({<br>      send_community_standard = optional(bool)<br>      send_community_extended = optional(bool)<br>      route_reflector_client  = optional(bool)<br>    })))<br>  }))</pre> | `{}` | no |
-| <a name="input_vrfs"></a> [vrfs](#input\_vrfs) | BGP VRFs. | <pre>map(object({<br>    router_id                       = optional(string)<br>    log_neighbor_changes            = optional(bool)<br>    graseful_restart_stalepath_time = optional(number)<br>    graseful_restart_restart_time   = optional(number)<br>    neighbors = optional(map(object({<br>      asn              = optional(string)<br>      inherit_peer     = optional(string)<br>      description      = optional(string)<br>      peer_type        = optional(string)<br>      source_interface = optional(string)<br>      address_families = optional(map(object({<br>        send_community_standard = optional(bool)<br>        send_community_extended = optional(bool)<br>        route_reflector_client  = optional(bool)<br>      })))<br>    })))<br>  }))</pre> | `{}` | no |
+| <a name="input_template_peer"></a> [template\_peer](#input\_template\_peer) | BGP template peers. | <pre>map(object({<br>    asn              = optional(string)<br>    description      = optional(string)<br>    peer_type        = optional(string)<br>    source_interface = optional(string)<br>    address_family = optional(map(object({<br>      send_community_standard = optional(bool)<br>      send_community_extended = optional(bool)<br>      route_reflector_client  = optional(bool)<br>    })))<br>  }))</pre> | `{}` | no |
+| <a name="input_vrf"></a> [vrf](#input\_vrf) | BGP VRFs. | <pre>map(object({<br>    router_id                       = optional(string)<br>    log_neighbor_changes            = optional(bool)<br>    graseful_restart_stalepath_time = optional(number)<br>    graseful_restart_restart_time   = optional(number)<br>    neighbors = optional(map(object({<br>      asn              = optional(string)<br>      inherit_peer     = optional(string)<br>      description      = optional(string)<br>      peer_type        = optional(string)<br>      source_interface = optional(string)<br>      address_family = optional(map(object({<br>        send_community_standard = optional(bool)<br>        send_community_extended = optional(bool)<br>        route_reflector_client  = optional(bool)<br>      })))<br>    })))<br>  }))</pre> | `{}` | no |
 
 ## Outputs
 

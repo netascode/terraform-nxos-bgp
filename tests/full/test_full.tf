@@ -6,13 +6,13 @@ terraform {
 
     nxos = {
       source  = "netascode/nxos"
-      version = ">=0.3.2"
+      version = ">=0.3.4"
     }
   }
 }
 
 # requirements
-resource "nxos_feature_bgp" "example" {
+resource "nxos_feature_bgp" "fmBgp" {
   admin_state = "enabled"
 }
 
@@ -29,13 +29,13 @@ module "main" {
 
   asn                     = "65001"
   enhanced_error_handling = false
-  template_peers = {
+  template_peer = {
     "SPINE-PEERS" = {
       asn              = "65001"
       description      = "Spine Peers template"
       peer_type        = "fabric-external"
       source_interface = "lo0"
-      address_families = {
+      address_family = {
         ipv4_unicast = {
           send_community_standard = true
           route_reflector_client  = true
@@ -48,7 +48,7 @@ module "main" {
       }
     }
   }
-  vrfs = {
+  vrf = {
     "default" = {
       router_id                       = "1.2.3.4"
       log_neighbor_changes            = true
@@ -60,7 +60,7 @@ module "main" {
           peer_type        = "fabric-external"
           asn              = "65002"
           source_interface = "lo2"
-          address_families = {
+          address_family = {
             ipv4_unicast = {
               send_community_standard = true
               send_community_extended = true
@@ -94,7 +94,7 @@ module "main" {
     }
   }
   depends_on = [
-    nxos_feature_bgp.example,
+    nxos_feature_bgp.fmBgp,
     nxos_vrf.l3Inst,
     nxos_ipv4_vrf.ipv4Dom
   ]
