@@ -1,9 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
 [![Tests](https://github.com/netascode/terraform-nxos-bgp/actions/workflows/test.yml/badge.svg)](https://github.com/netascode/terraform-nxos-bgp/actions/workflows/test.yml)
 
-# Terraform NXOS BGP Module
-
-Description
+# Terraform NX-OS BGP Module
 
 Manages NX-OS BGP
 
