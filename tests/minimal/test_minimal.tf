@@ -6,13 +6,13 @@ terraform {
 
     nxos = {
       source  = "netascode/nxos"
-      version = ">=0.3.4"
+      version = ">=0.3.5"
     }
   }
 }
 
 # requirement
-resource "nxos_feature_bgp" "example" {
+resource "nxos_feature_bgp" "fmBgp" {
   admin_state = "enabled"
 }
 
@@ -22,7 +22,7 @@ module "main" {
 
   asn = "65002"
   depends_on = [
-    nxos_feature_bgp.example
+    nxos_feature_bgp.fmBgp
   ]
 }
 

@@ -47,7 +47,7 @@ variable "template_peer" {
     condition = alltrue([
       for k, v in var.template_peer : can(regex("^.{0,254}$", v.description)) || v.description == null
     ])
-    error_message = "`description`: Maximum characters: 254."
+    error_message = "`description`: Maximum characters: `254`."
   }
 
   validation {
@@ -61,7 +61,7 @@ variable "template_peer" {
     condition = alltrue([
       for k, v in var.template_peer : can(regex("^\\S*$", v.source_interface)) || v.source_interface == null
     ])
-    error_message = "`source_interface`: Whitespaces are not allowed. Must match first field in the output of `show intf brief`. Example: `eth1/1`."
+    error_message = "`source_interface`: Whitespaces are not allowed. Must match first field in the output of `show int brief`. Example: `eth1/1`."
   }
 
   validation {
@@ -150,7 +150,7 @@ variable "vrf" {
         for k, v in value.neighbors : can(regex("^.{0,254}$", v.description)) || v.description == null
       ]
     ]))
-    error_message = "`description`: Maximum characters: 254."
+    error_message = "`description`: Maximum characters: `254`."
   }
 
   validation {
@@ -168,7 +168,7 @@ variable "vrf" {
         for k, v in value.neighbors : can(regex("^\\S*$", v.source_interface)) || v.source_interface == null
       ]
     ]))
-    error_message = "`source_interface`: White spaces are not allowed. Must match first field in the output of `show intf brief`. Example: `eth1/1`."
+    error_message = "`source_interface`: Whitespaces are not allowed. Must match first field in the output of `show int brief`. Example: `eth1/1`."
   }
 
   validation {
