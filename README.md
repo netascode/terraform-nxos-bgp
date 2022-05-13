@@ -16,70 +16,81 @@ module "nxos_bgp" {
 
   asn                     = "65001"
   enhanced_error_handling = false
-  template_peer = {
-    "SPINE-PEERS" = {
+  template_peers = [
+    {
+      name             = "SPINE-PEERS"
       asn              = "65001"
       description      = "Spine Peers template"
       peer_type        = "fabric-external"
       source_interface = "lo0"
-      address_family = {
-        ipv4_unicast = {
+      address_families = [
+        {
+          address_family          = "ipv4_unicast"
           send_community_standard = true
           route_reflector_client  = true
-        }
-        l2vpn_evpn = {
+        },
+        {
+          address_family          = "l2vpn_evpn"
           send_community_standard = true
           send_community_extended = true
           route_reflector_client  = true
         }
-      }
+      ]
     }
-  }
-  vrf = {
-    "default" = {
+  ]
+  vrfs = [
+    {
+      vrf                             = "default"
       router_id                       = "1.2.3.4"
       log_neighbor_changes            = true
-      graseful_restart_stalepath_time = 123
-      graseful_restart_restart_time   = 123
-      neighbors = {
-        "5.6.7.8" = {
+      graceful_restart_stalepath_time = 123
+      graceful_restart_restart_time   = 123
+      neighbors = [
+        {
+          ip               = "5.6.7.8"
           description      = "My description"
           peer_type        = "fabric-external"
           asn              = "65002"
           source_interface = "lo2"
-          address_family = {
-            ipv4_unicast = {
+          address_families = [
+            {
+              address_family          = "ipv4_unicast"
               send_community_standard = true
               send_community_extended = true
               route_reflector_client  = false
-            }
-            l2vpn_evpn = {
+            },
+            {
+              address_family          = "l2vpn_evpn"
               send_community_standard = true
               route_reflector_client  = false
             }
-          }
-        }
-        "9.10.11.12" = {
+          ]
+        },
+        {
+          ip           = "9.10.11.12"
           description  = "My description 2"
           inherit_peer = "SPINE-PEERS"
         }
-      }
-    }
-    "VRF1" = {
+      ]
+    },
+    {
+      vrf                             = "VRF1"
       router_id                       = "10.20.30.40"
       log_neighbor_changes            = true
-      graseful_restart_stalepath_time = 1230
-      graseful_restart_restart_time   = 1230
-      neighbors = {
-        "50.60.70.80" = {
+      graceful_restart_stalepath_time = 1230
+      graceful_restart_restart_time   = 1230
+      neighbors = [
+        {
+          ip          = "50.60.70.80"
           description = "My description"
-        }
-        "90.100.110.120" = {
+        },
+        {
+          ip          = "90.100.110.120"
           description = "My description 2"
         }
-      }
+      ]
     }
-  }
+  ]
 }
 ```
 
@@ -100,10 +111,11 @@ module "nxos_bgp" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
+| <a name="input_device"></a> [device](#input\_device) | A device name from the provider configuration. | `string` | `null` | no |
 | <a name="input_asn"></a> [asn](#input\_asn) | BGP Autonomous system number. | `string` | n/a | yes |
 | <a name="input_enhanced_error_handling"></a> [enhanced\_error\_handling](#input\_enhanced\_error\_handling) | BGP Enhanced error handling. | `bool` | `true` | no |
-| <a name="input_template_peer"></a> [template\_peer](#input\_template\_peer) | BGP template peers. | <pre>map(object({<br>    asn              = optional(string)<br>    description      = optional(string)<br>    peer_type        = optional(string)<br>    source_interface = optional(string)<br>    address_family = optional(map(object({<br>      send_community_standard = optional(bool)<br>      send_community_extended = optional(bool)<br>      route_reflector_client  = optional(bool)<br>    })))<br>  }))</pre> | `{}` | no |
-| <a name="input_vrf"></a> [vrf](#input\_vrf) | BGP VRFs. | <pre>map(object({<br>    router_id                       = optional(string)<br>    log_neighbor_changes            = optional(bool)<br>    graseful_restart_stalepath_time = optional(number)<br>    graseful_restart_restart_time   = optional(number)<br>    neighbors = optional(map(object({<br>      asn              = optional(string)<br>      inherit_peer     = optional(string)<br>      description      = optional(string)<br>      peer_type        = optional(string)<br>      source_interface = optional(string)<br>      address_family = optional(map(object({<br>        send_community_standard = optional(bool)<br>        send_community_extended = optional(bool)<br>        route_reflector_client  = optional(bool)<br>      })))<br>    })))<br>  }))</pre> | `{}` | no |
+| <a name="input_template_peers"></a> [template\_peers](#input\_template\_peers) | BGP Template Peers list.<br>  Choices `peer_type`: `fabric-internal`, `fabric-external`, `fabric-border-leaf`. Default value `peer_type`: `fabric-internal`.<br>  List `address_families`:<br>  Choices `address_family`: `ipv4_unicast`, `ipv6_unicast`. | <pre>list(object({<br>    name             = string<br>    asn              = optional(string)<br>    description      = optional(string)<br>    peer_type        = optional(string)<br>    source_interface = optional(string)<br>    address_families = optional(list(object({<br>      address_family          = string<br>      send_community_standard = optional(bool)<br>      send_community_extended = optional(bool)<br>      route_reflector_client  = optional(bool)<br>    })))<br>  }))</pre> | `[]` | no |
+| <a name="input_vrfs"></a> [vrfs](#input\_vrfs) | BGP VRF list.<br>  List `neighbors`:<br>  Allowed formats `ip`: `192.168.1.1` or `192.168.1.0/24`.<br>  Choices `peer_type`: `fabric-internal`, `fabric-external`, `fabric-border-leaf`. Default value `peer_type`: `fabric-internal`.<br>  List `address_families`:<br>  Choices `address_family`: `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`. | <pre>list(object({<br>    vrf                             = string<br>    router_id                       = optional(string)<br>    log_neighbor_changes            = optional(bool)<br>    graceful_restart_stalepath_time = optional(number)<br>    graceful_restart_restart_time   = optional(number)<br>    neighbors = optional(list(object({<br>      ip               = string<br>      asn              = optional(string)<br>      inherit_peer     = optional(string)<br>      description      = optional(string)<br>      peer_type        = optional(string)<br>      source_interface = optional(string)<br>      address_families = optional(list(object({<br>        address_family          = string<br>        send_community_standard = optional(bool)<br>        send_community_extended = optional(bool)<br>        route_reflector_client  = optional(bool)<br>      })))<br>    })))<br>  }))</pre> | `[]` | no |
 
 ## Outputs
 
