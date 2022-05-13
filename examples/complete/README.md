@@ -14,7 +14,7 @@ Note that this example will create resources. Resources can be destroyed with `t
 ```hcl
 module "nxos_bgp" {
   source  = "netascode/bgp/nxos"
-  version = ">= 0.0.1"
+  version = ">= 0.1.0"
 
   asn                     = "65001"
   enhanced_error_handling = false
