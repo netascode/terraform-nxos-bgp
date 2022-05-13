@@ -28,7 +28,7 @@ variable "template_peers" {
   Choices `address_family`: `ipv4_unicast`, `ipv6_unicast`.
   EOT
   type = list(object({
-    template_peer    = string
+    name             = string
     asn              = optional(string)
     description      = optional(string)
     peer_type        = optional(string)
@@ -44,9 +44,9 @@ variable "template_peers" {
 
   validation {
     condition = alltrue([
-      for v in var.template_peers : can(regex("^\\S+$", v.template_peer))
+      for v in var.template_peers : can(regex("^\\S+$", v.name))
     ])
-    error_message = "`template_peer`: Whitespaces are not allowed."
+    error_message = "`name`: Whitespaces are not allowed."
   }
 
   validation {
@@ -91,7 +91,7 @@ variable "vrfs" {
   description = <<EOT
   BGP VRF list.
   List `neighbors`:
-  Allowed formats `neighbor`: `192.168.1.1` or `192.168.1.0/24`.
+  Allowed formats `ip`: `192.168.1.1` or `192.168.1.0/24`.
   Choices `peer_type`: `fabric-internal`, `fabric-external`, `fabric-border-leaf`. Default value `peer_type`: `fabric-internal`.
   List `address_families`:
   Choices `address_family`: `ipv4_unicast`, `ipv6_unicast`, `l2vpn_evpn`.
@@ -103,7 +103,7 @@ variable "vrfs" {
     graceful_restart_stalepath_time = optional(number)
     graceful_restart_restart_time   = optional(number)
     neighbors = optional(list(object({
-      neighbor         = string
+      ip               = string
       asn              = optional(string)
       inherit_peer     = optional(string)
       description      = optional(string)
@@ -143,10 +143,10 @@ variable "vrfs" {
   validation {
     condition = alltrue(flatten([
       for value in var.vrfs : value.neighbors == null ? [true] : [
-        for v in value.neighbors : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", v.neighbor)) || can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+\\/\\d+$", v.neighbor))
+        for v in value.neighbors : can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+$", v.ip)) || can(regex("^\\d+\\.\\d+\\.\\d+\\.\\d+\\/\\d+$", v.ip))
       ]
     ]))
-    error_message = "`neighbor`: Allowed formats are: `192.168.1.1` or `192.168.1.0/24`."
+    error_message = "`ip`: Allowed formats are: `192.168.1.1` or `192.168.1.0/24`."
   }
 
   validation {

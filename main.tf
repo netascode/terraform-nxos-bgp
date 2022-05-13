@@ -5,11 +5,11 @@ locals {
     "l2vpn_evpn" : "l2vpn-evpn"
   }
   vrf_map           = { for v in var.vrfs : v.vrf => v }
-  template_peer_map = { for v in var.template_peers : v.template_peer => v }
+  template_peer_map = { for v in var.template_peers : v.name => v }
   template_peer_af_map = merge([
     for tp in var.template_peers : {
       for af in tp.address_families :
-      "${tp.template_peer}-${af.address_family}" => merge(af, { "template_peer" : tp.template_peer, "address_family" : local.address_family_names_map[af.address_family] })
+      "${tp.name}-${af.address_family}" => merge(af, { "name" : tp.name, "address_family" : local.address_family_names_map[af.address_family] })
     } if tp.address_families != null
   ]...)
   /* Example:
@@ -19,20 +19,20 @@ locals {
       "route_reflector_client" = true
       "send_community_extended" = tobool(null)
       "send_community_standard" = true
-      "template_peer" = "SPINE-PEERS"
+      "name" = "SPINE-PEERS"
     }
     "SPINE-PEERS-l2vpn_evpn" = {
       "address_family" = "l2vpn-evpn"
       "route_reflector_client" = true
       "send_community_extended" = true
       "send_community_standard" = true
-      "template_peer" = "SPINE-PEERS"
+      "name" = "SPINE-PEERS"
   }
   */
 
   neighbors_map = merge([
     for v in var.vrfs : {
-      for n in v.neighbors : "${v.vrf}-${n.neighbor}" => merge(n, { "vrf" : v.vrf })
+      for n in v.neighbors : "${v.vrf}-${n.ip}" => merge(n, { "vrf" : v.vrf })
     }
   ]...)
   /* Example:
@@ -42,7 +42,7 @@ locals {
       "asn" = tostring(null)
       "description" = "My description"
       "inherit_peer" = tostring(null)
-      "neighbor" = "50.60.70.80"
+      "ip" = "50.60.70.80"
       "peer_type" = tostring(null)
       "source_interface" = tostring(null)
       "vrf" = "VRF1"
@@ -52,7 +52,7 @@ locals {
       "asn" = tostring(null)
       "description" = "My description 2"
       "inherit_peer" = tostring(null)
-      "neighbor" = "90.100.110.120"
+      "ip" = "90.100.110.120"
       "peer_type" = tostring(null)
       "source_interface" = tostring(null)
       "vrf" = "VRF1"
@@ -75,7 +75,7 @@ locals {
       "asn" = "65002"
       "description" = "My description"
       "inherit_peer" = tostring(null)
-      "neighbor" = "5.6.7.8"
+      "ip" = "5.6.7.8"
       "peer_type" = "fabric-external"
       "source_interface" = "lo2"
       "vrf" = "default"
@@ -85,7 +85,7 @@ locals {
       "asn" = tostring(null)
       "description" = "My description 2"
       "inherit_peer" = "SPINE-PEERS"
-      "neighbor" = "9.10.11.12"
+      "ip" = "9.10.11.12"
       "peer_type" = tostring(null)
       "source_interface" = tostring(null)
       "vrf" = "default"
@@ -95,7 +95,7 @@ locals {
 
   neighbors_af_map = merge([
     for neighbor_key, neighbor in local.neighbors_map : {
-      for af in neighbor.address_families : "${neighbor_key}-${af.address_family}" => merge(af, { "vrf" : neighbor.vrf, "neighbor" : neighbor.neighbor, "address_family" : local.address_family_names_map[af.address_family] })
+      for af in neighbor.address_families : "${neighbor_key}-${af.address_family}" => merge(af, { "vrf" : neighbor.vrf, "ip" : neighbor.ip, "address_family" : local.address_family_names_map[af.address_family] })
     } if neighbor.address_families != null
   ]...)
   /*
@@ -103,7 +103,7 @@ locals {
   {
     "default-5.6.7.8-ipv4_unicast" = {
       "address_family" = "ipv4-ucast"
-      "neighbor" = "5.6.7.8"
+      "ip" = "5.6.7.8"
       "route_reflector_client" = false
       "send_community_extended" = true
       "send_community_standard" = true
@@ -111,7 +111,7 @@ locals {
     }
     "default-5.6.7.8-l2vpn_evpn" = {
       "address_family" = "l2vpn-evpn"
-      "neighbor" = "5.6.7.8"
+      "ip" = "5.6.7.8"
       "route_reflector_client" = false
       "send_community_extended" = tobool(null)
       "send_community_standard" = true
@@ -188,7 +188,7 @@ resource "nxos_bgp_peer_template" "bgpPeerCont" {
 resource "nxos_bgp_peer_template_address_family" "bgpPeerAf" {
   for_each                = local.template_peer_af_map
   device                  = var.device
-  template_name           = each.value.template_peer
+  template_name           = each.value.name
   address_family          = each.value.address_family
   control                 = each.value.route_reflector_client == true ? "rr-client" : ""
   send_community_extended = each.value.send_community_extended == true ? "enabled" : "disabled"
@@ -203,7 +203,7 @@ resource "nxos_bgp_peer" "bgpPeer" {
   for_each         = local.neighbors_map
   device           = var.device
   vrf              = each.value.vrf
-  address          = each.value.neighbor
+  address          = each.value.ip
   asn              = each.value.asn
   description      = each.value.description != null ? each.value.description : ""
   peer_template    = each.value.inherit_peer != null ? each.value.inherit_peer : ""
@@ -219,7 +219,7 @@ resource "nxos_bgp_peer_address_family" "bgpPeerAf" {
   for_each                = local.neighbors_af_map
   device                  = var.device
   vrf                     = each.value.vrf
-  address                 = each.value.neighbor
+  address                 = each.value.ip
   address_family          = each.value.address_family
   control                 = each.value.route_reflector_client == true ? "rr-client" : ""
   send_community_extended = each.value.send_community_extended == true ? "enabled" : "disabled"

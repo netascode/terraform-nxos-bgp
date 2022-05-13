@@ -20,7 +20,7 @@ module "nxos_bgp" {
   enhanced_error_handling = false
   template_peers = [
     {
-      template_peer    = "SPINE-PEERS"
+      name             = "SPINE-PEERS"
       asn              = "65001"
       description      = "Spine Peers template"
       peer_type        = "fabric-external"
@@ -49,7 +49,7 @@ module "nxos_bgp" {
       graceful_restart_restart_time   = 123
       neighbors = [
         {
-          neighbor         = "5.6.7.8"
+          ip               = "5.6.7.8"
           description      = "My description"
           peer_type        = "fabric-external"
           asn              = "65002"
@@ -69,7 +69,7 @@ module "nxos_bgp" {
           ]
         },
         {
-          neighbor     = "9.10.11.12"
+          ip           = "9.10.11.12"
           description  = "My description 2"
           inherit_peer = "SPINE-PEERS"
         }
@@ -83,11 +83,11 @@ module "nxos_bgp" {
       graceful_restart_restart_time   = 1230
       neighbors = [
         {
-          neighbor    = "50.60.70.80"
+          ip          = "50.60.70.80"
           description = "My description"
         },
         {
-          neighbor    = "90.100.110.120"
+          ip          = "90.100.110.120"
           description = "My description 2"
         }
       ]
