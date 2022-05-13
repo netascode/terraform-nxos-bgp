@@ -163,8 +163,8 @@ resource "nxos_bgp_graceful_restart" "bgpGr" {
   for_each         = local.vrf_map
   device           = var.device
   vrf              = each.key
-  restart_interval = each.value.graseful_restart_restart_time != null ? each.value.graseful_restart_restart_time : 120
-  stale_interval   = each.value.graseful_restart_stalepath_time != null ? each.value.graseful_restart_stalepath_time : 300
+  restart_interval = each.value.graceful_restart_restart_time != null ? each.value.graceful_restart_restart_time : 120
+  stale_interval   = each.value.graceful_restart_stalepath_time != null ? each.value.graceful_restart_stalepath_time : 300
 
   depends_on = [
     nxos_bgp_vrf.bgpDom

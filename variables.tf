@@ -100,8 +100,8 @@ variable "vrfs" {
     vrf                             = string
     router_id                       = optional(string)
     log_neighbor_changes            = optional(bool)
-    graseful_restart_stalepath_time = optional(number)
-    graseful_restart_restart_time   = optional(number)
+    graceful_restart_stalepath_time = optional(number)
+    graceful_restart_restart_time   = optional(number)
     neighbors = optional(list(object({
       neighbor         = string
       asn              = optional(string)
@@ -128,16 +128,16 @@ variable "vrfs" {
 
   validation {
     condition = alltrue([
-      for v in var.vrfs : try(v.graseful_restart_stalepath_time >= 1 && v.graseful_restart_stalepath_time <= 3600, v.graseful_restart_stalepath_time == null)
+      for v in var.vrfs : try(v.graceful_restart_stalepath_time >= 1 && v.graceful_restart_stalepath_time <= 3600, v.graceful_restart_stalepath_time == null)
     ])
-    error_message = "`graseful_restart_stalepath_time`: Minimum value: `1`. Maximum value: `3600`."
+    error_message = "`graceful_restart_stalepath_time`: Minimum value: `1`. Maximum value: `3600`."
   }
 
   validation {
     condition = alltrue([
-      for v in var.vrfs : try(v.graseful_restart_restart_time >= 1 && v.graseful_restart_restart_time <= 3600, v.graseful_restart_restart_time == null)
+      for v in var.vrfs : try(v.graceful_restart_restart_time >= 1 && v.graceful_restart_restart_time <= 3600, v.graceful_restart_restart_time == null)
     ])
-    error_message = "`graseful_restart_restart_time`: Minimum value: `1`. Maximum value: `3600`."
+    error_message = "`graceful_restart_restart_time`: Minimum value: `1`. Maximum value: `3600`."
   }
 
   validation {

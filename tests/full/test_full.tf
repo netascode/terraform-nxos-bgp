@@ -56,8 +56,8 @@ module "main" {
       vrf                             = "default"
       router_id                       = "1.2.3.4"
       log_neighbor_changes            = true
-      graseful_restart_stalepath_time = 123
-      graseful_restart_restart_time   = 123
+      graceful_restart_stalepath_time = 123
+      graceful_restart_restart_time   = 123
       neighbors = [
         {
           neighbor         = "5.6.7.8"
@@ -90,8 +90,8 @@ module "main" {
       vrf                             = "VRF1"
       router_id                       = "10.20.30.40"
       log_neighbor_changes            = true
-      graseful_restart_stalepath_time = 1230
-      graseful_restart_restart_time   = 1230
+      graceful_restart_stalepath_time = 1230
+      graceful_restart_restart_time   = 1230
       neighbors = [
         {
           neighbor    = "50.60.70.80"
