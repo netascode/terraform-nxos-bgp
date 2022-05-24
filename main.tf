@@ -140,6 +140,7 @@ resource "nxos_bgp_instance" "bgpInst" {
 resource "nxos_bgp_vrf" "bgpDom" {
   for_each  = local.vrf_map
   device    = var.device
+  asn       = var.asn
   name      = each.key
   router_id = each.value.router_id
 
@@ -151,6 +152,7 @@ resource "nxos_bgp_vrf" "bgpDom" {
 resource "nxos_bgp_route_control" "bgpRtCtrl" {
   for_each             = local.vrf_map
   device               = var.device
+  asn                  = var.asn
   vrf                  = each.key
   log_neighbor_changes = each.value.log_neighbor_changes == true ? "enabled" : "disabled"
 
@@ -162,6 +164,7 @@ resource "nxos_bgp_route_control" "bgpRtCtrl" {
 resource "nxos_bgp_graceful_restart" "bgpGr" {
   for_each         = local.vrf_map
   device           = var.device
+  asn              = var.asn
   vrf              = each.key
   restart_interval = each.value.graceful_restart_restart_time != null ? each.value.graceful_restart_restart_time : 120
   stale_interval   = each.value.graceful_restart_stalepath_time != null ? each.value.graceful_restart_stalepath_time : 300
@@ -174,8 +177,9 @@ resource "nxos_bgp_graceful_restart" "bgpGr" {
 resource "nxos_bgp_peer_template" "bgpPeerCont" {
   for_each         = local.template_peer_map
   device           = var.device
+  asn              = var.asn
   template_name    = each.key
-  asn              = each.value.asn
+  remote_asn       = each.value.asn
   description      = each.value.description != null ? each.value.description : ""
   peer_type        = each.value.peer_type != null ? each.value.peer_type : "fabric-internal"
   source_interface = each.value.source_interface != null ? each.value.source_interface : "unspecified"
@@ -188,6 +192,7 @@ resource "nxos_bgp_peer_template" "bgpPeerCont" {
 resource "nxos_bgp_peer_template_address_family" "bgpPeerAf" {
   for_each                = local.template_peer_af_map
   device                  = var.device
+  asn                     = var.asn
   template_name           = each.value.name
   address_family          = each.value.address_family
   control                 = each.value.route_reflector_client == true ? "rr-client" : ""
@@ -202,9 +207,10 @@ resource "nxos_bgp_peer_template_address_family" "bgpPeerAf" {
 resource "nxos_bgp_peer" "bgpPeer" {
   for_each         = local.neighbors_map
   device           = var.device
+  asn              = var.asn
   vrf              = each.value.vrf
   address          = each.value.ip
-  asn              = each.value.asn
+  remote_asn       = each.value.asn
   description      = each.value.description != null ? each.value.description : ""
   peer_template    = each.value.inherit_peer != null ? each.value.inherit_peer : ""
   peer_type        = each.value.peer_type != null ? each.value.peer_type : "fabric-internal"
@@ -218,6 +224,7 @@ resource "nxos_bgp_peer" "bgpPeer" {
 resource "nxos_bgp_peer_address_family" "bgpPeerAf" {
   for_each                = local.neighbors_af_map
   device                  = var.device
+  asn                     = var.asn
   vrf                     = each.value.vrf
   address                 = each.value.ip
   address_family          = each.value.address_family
