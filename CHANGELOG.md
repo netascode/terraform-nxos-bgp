@@ -1,4 +1,4 @@
-## 0.1.1 (unreleased)
+## 0.1.1
 
 - Add asn to bgp resources to be compatible with provider versions >= 0.3.14
 
