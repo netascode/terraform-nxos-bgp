@@ -1,6 +1,6 @@
 module "nxos_bgp" {
   source  = "netascode/bgp/nxos"
-  version = ">= 0.1.0"
+  version = ">= 0.2.0"
 
   asn                     = "65001"
   enhanced_error_handling = false

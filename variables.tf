@@ -30,15 +30,15 @@ variable "template_peers" {
   type = list(object({
     name             = string
     asn              = optional(string)
-    description      = optional(string)
-    peer_type        = optional(string)
-    source_interface = optional(string)
+    description      = optional(string, "")
+    peer_type        = optional(string, "fabric-internal")
+    source_interface = optional(string, "unspecified")
     address_families = optional(list(object({
       address_family          = string
-      send_community_standard = optional(bool)
-      send_community_extended = optional(bool)
-      route_reflector_client  = optional(bool)
-    })))
+      send_community_standard = optional(bool, false)
+      send_community_extended = optional(bool, false)
+      route_reflector_client  = optional(bool, false)
+    })), [])
   }))
   default = []
 
@@ -99,21 +99,21 @@ variable "vrfs" {
   type = list(object({
     vrf                             = string
     router_id                       = optional(string)
-    log_neighbor_changes            = optional(bool)
-    graceful_restart_stalepath_time = optional(number)
-    graceful_restart_restart_time   = optional(number)
+    log_neighbor_changes            = optional(bool, false)
+    graceful_restart_stalepath_time = optional(number, 300)
+    graceful_restart_restart_time   = optional(number, 120)
     neighbors = optional(list(object({
       ip               = string
       asn              = optional(string)
-      inherit_peer     = optional(string)
-      description      = optional(string)
-      peer_type        = optional(string)
-      source_interface = optional(string)
+      inherit_peer     = optional(string, "")
+      description      = optional(string, "")
+      peer_type        = optional(string, "fabric-internal")
+      source_interface = optional(string, "unspecified")
       address_families = optional(list(object({
         address_family          = string
-        send_community_standard = optional(bool)
-        send_community_extended = optional(bool)
-        route_reflector_client  = optional(bool)
+        send_community_standard = optional(bool, false)
+        send_community_extended = optional(bool, false)
+        route_reflector_client  = optional(bool, false)
       })))
     })))
   }))

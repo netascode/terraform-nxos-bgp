@@ -166,8 +166,8 @@ resource "nxos_bgp_graceful_restart" "bgpGr" {
   device           = var.device
   asn              = var.asn
   vrf              = each.key
-  restart_interval = each.value.graceful_restart_restart_time != null ? each.value.graceful_restart_restart_time : 120
-  stale_interval   = each.value.graceful_restart_stalepath_time != null ? each.value.graceful_restart_stalepath_time : 300
+  restart_interval = each.value.graceful_restart_restart_time
+  stale_interval   = each.value.graceful_restart_stalepath_time
 
   depends_on = [
     nxos_bgp_vrf.bgpDom
@@ -180,9 +180,9 @@ resource "nxos_bgp_peer_template" "bgpPeerCont" {
   asn              = var.asn
   template_name    = each.key
   remote_asn       = each.value.asn
-  description      = each.value.description != null ? each.value.description : ""
-  peer_type        = each.value.peer_type != null ? each.value.peer_type : "fabric-internal"
-  source_interface = each.value.source_interface != null ? each.value.source_interface : "unspecified"
+  description      = each.value.description
+  peer_type        = each.value.peer_type
+  source_interface = each.value.source_interface
 
   depends_on = [
     nxos_bgp_vrf.bgpDom
@@ -211,10 +211,10 @@ resource "nxos_bgp_peer" "bgpPeer" {
   vrf              = each.value.vrf
   address          = each.value.ip
   remote_asn       = each.value.asn
-  description      = each.value.description != null ? each.value.description : ""
-  peer_template    = each.value.inherit_peer != null ? each.value.inherit_peer : ""
-  peer_type        = each.value.peer_type != null ? each.value.peer_type : "fabric-internal"
-  source_interface = each.value.source_interface != null ? each.value.source_interface : "unspecified"
+  description      = each.value.description
+  peer_template    = each.value.inherit_peer
+  peer_type        = each.value.peer_type
+  source_interface = each.value.source_interface
 
   depends_on = [
     nxos_bgp_vrf.bgpDom
