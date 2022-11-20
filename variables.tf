@@ -161,7 +161,7 @@ variable "vrfs" {
   validation {
     condition = alltrue(flatten([
       for value in var.vrfs : value.neighbors == null ? [true] : [
-        for v in value.neighbors : can(regex("^\\S+$", v.inherit_peer)) || v.inherit_peer == null
+        for v in value.neighbors : can(regex("^\\S*$", v.inherit_peer)) || v.inherit_peer == null
       ]
     ]))
     error_message = "`inherit_peer`: Whitespaces are not allowed."
