@@ -99,13 +99,13 @@ module "nxos_bgp" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
-| <a name="requirement_nxos"></a> [nxos](#requirement\_nxos) | >= 0.3.15 |
+| <a name="requirement_nxos"></a> [nxos](#requirement\_nxos) | >= 0.5.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_nxos"></a> [nxos](#provider\_nxos) | >= 0.3.15 |
+| <a name="provider_nxos"></a> [nxos](#provider\_nxos) | >= 0.5.0 |
 
 ## Inputs
 
@@ -127,13 +127,13 @@ module "nxos_bgp" {
 
 | Name | Type |
 |------|------|
-| [nxos_bgp.bgpEntity](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp) | resource |
-| [nxos_bgp_graceful_restart.bgpGr](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_graceful_restart) | resource |
-| [nxos_bgp_instance.bgpInst](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_instance) | resource |
-| [nxos_bgp_peer.bgpPeer](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_peer) | resource |
-| [nxos_bgp_peer_address_family.bgpPeerAf](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_peer_address_family) | resource |
-| [nxos_bgp_peer_template.bgpPeerCont](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_peer_template) | resource |
-| [nxos_bgp_peer_template_address_family.bgpPeerAf](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_peer_template_address_family) | resource |
-| [nxos_bgp_route_control.bgpRtCtrl](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_route_control) | resource |
-| [nxos_bgp_vrf.bgpDom](https://registry.terraform.io/providers/netascode/nxos/latest/docs/resources/bgp_vrf) | resource |
+| [nxos_bgp.bgpEntity](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp) | resource |
+| [nxos_bgp_graceful_restart.bgpGr](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_graceful_restart) | resource |
+| [nxos_bgp_instance.bgpInst](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_instance) | resource |
+| [nxos_bgp_peer.bgpPeer](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_peer) | resource |
+| [nxos_bgp_peer_address_family.bgpPeerAf](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_peer_address_family) | resource |
+| [nxos_bgp_peer_template.bgpPeerCont](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_peer_template) | resource |
+| [nxos_bgp_peer_template_address_family.bgpPeerAf](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_peer_template_address_family) | resource |
+| [nxos_bgp_route_control.bgpRtCtrl](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_route_control) | resource |
+| [nxos_bgp_vrf.bgpDom](https://registry.terraform.io/providers/CiscoDevNet/nxos/latest/docs/resources/bgp_vrf) | resource |
 <!-- END_TF_DOCS -->

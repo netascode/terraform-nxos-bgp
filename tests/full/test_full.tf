@@ -7,8 +7,8 @@ terraform {
     }
 
     nxos = {
-      source  = "netascode/nxos"
-      version = ">=0.3.15"
+      source  = "CiscoDevNet/nxos"
+      version = ">= 0.5.0"
     }
   }
 }
